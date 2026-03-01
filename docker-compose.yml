@@ -1,0 +1,46 @@
+#version: '3.10'
+
+services:
+  web:
+    build: .
+    container_name: monitor_web
+    restart: always
+    command: uvicorn app.main:app --host 0.0.0.0 --port 8000 --reload
+    ports:
+      - "8000:8000"
+    environment:
+      - DATABASE_URL=postgresql+asyncpg://admin:mypassword@db/monitor_db
+      - REDIS_URL=redis://redis:6379
+    volumes:
+      - .:/code
+    depends_on:
+        db:
+            condition: service_healthy
+
+  db:
+    image: postgres:15-alpine
+    container_name: monitor_db
+    restart: always
+    environment:
+      - POSTGRES_USER=admin
+      - POSTGRES_PASSWORD=mypassword
+      - POSTGRES_DB=monitor_db
+    ports:
+      - "5432:5432"
+    volumes:
+      - pg_data:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U admin -d monitor_db"]
+      interval: 5s
+      timeout: 5s
+      retries: 5
+
+  redis_cache:
+    image: redis:alpine
+    container_name: monitor_redis
+    restart: always
+    ports:
+      - "6379:6379"
+
+volumes:
+  pg_data:
