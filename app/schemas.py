@@ -2,7 +2,7 @@ from sqlmodel import SQLModel
 from typing import Optional
 from datetime import datetime
 
-#模式
+#模式，api层，定义api请求和响应的数据格式，验证规则
 
 class ProductBaseSchema(SQLModel):
     name:str

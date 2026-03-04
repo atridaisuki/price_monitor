@@ -3,31 +3,36 @@ from fastapi import APIRouter, Depends, HTTPException, status, Query
 from sqlmodel import select
 from sqlalchemy.ext.asyncio import AsyncSession
 from app.database import get_session
-from app import models, shemas
+from app import models, schemas
 
+#prefix前缀
 router = APIRouter(prefix="/products", tags=["products"])
 
 
-@router.post("/", response_model=shemas.ProductRead, status_code=status.HTTP_201_CREATED)
+@router.post("/", response_model=schemas.ProductRead, status_code=status.HTTP_201_CREATED)
 async def create_product(
-    product: shemas.ProductCreate,
+    product: schemas.ProductCreate,
     session: AsyncSession = Depends(get_session)
 ):
     """创建商品"""
+    #from_orm 将schemas.productcreate格式直接转为models.product
     db_product = models.Product.from_orm(product)
+
+
     session.add(db_product)
     await session.commit()
     await session.refresh(db_product)
     return db_product
 
 
-@router.get("/", response_model=List[shemas.ProductRead])
+@router.get("/", response_model=List[schemas.ProductRead])
 async def list_products(
     skip: int = Query(0, ge=0),
     limit: int = Query(100, ge=1, le=100),
     session: AsyncSession = Depends(get_session)
 ):
     """获取商品列表"""
+    #异步用execute，同步用exec
     result = await session.execute(
         select(models.Product).offset(skip).limit(limit)
     )
@@ -35,7 +40,7 @@ async def list_products(
     return products
 
 
-@router.get("/{product_id}", response_model=shemas.ProductRead)
+@router.get("/{product_id}", response_model=schemas.ProductRead)
 async def get_product(
     product_id: int,
     session: AsyncSession = Depends(get_session)
@@ -53,10 +58,10 @@ async def get_product(
     return product
 
 
-@router.put("/{product_id}", response_model=shemas.ProductRead)
+@router.put("/{product_id}", response_model=schemas.ProductRead)
 async def update_product(
     product_id: int,
-    product_update: shemas.ProductUpdate,
+    product_update: schemas.ProductUpdate,
     session: AsyncSession = Depends(get_session)
 ):
     """更新商品"""
@@ -80,7 +85,7 @@ async def update_product(
     return db_product
 
 
-@router.delete("/{product_id}", response_model=shemas.ProductRead)
+@router.delete("/{product_id}", response_model=schemas.ProductRead)
 async def delete_product(
     product_id: int,
     session: AsyncSession = Depends(get_session)
@@ -101,7 +106,7 @@ async def delete_product(
     return db_product
 
 
-@router.get("/{product_id}/history", response_model=List[shemas.PriceHistoryRead])
+@router.get("/{product_id}/history", response_model=List[schemas.PriceHistoryRead])
 async def get_price_history(
     product_id: int,
     skip: int = Query(0, ge=0),

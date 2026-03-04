@@ -2,6 +2,7 @@ from typing import Optional,List
 from datetime import datetime
 from sqlmodel import SQLModel, Field, Relationship
 
+#模板，数据库层
 
 class ProductBase(SQLModel):
     name: str
