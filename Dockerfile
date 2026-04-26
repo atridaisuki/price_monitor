@@ -10,11 +10,15 @@ RUN apt-get update && apt-get install -y \
 # 安装 Python 依赖
 COPY requirements.txt .
 RUN pip install --no-cache-dir -r requirements.txt
-
 # 复制应用代码
 COPY app ./app
+COPY alembic ./alembic
+COPY alembic.ini ./alembic.ini
 
+#端口
 EXPOSE 8000
+#python不缓冲输出
 ENV PYTHONUNBUFFERED=1
 
+#容器启动命令
 CMD ["uvicorn", "app.main:app", "--host", "0.0.0.0", "--port", "8000"]

@@ -9,6 +9,7 @@ class ProductBaseSchema(SQLModel):
     url:str
     platform:str="steam"
     target_price:float
+    user_qq:Optional[str]=None
 
 class ProductCreate(ProductBaseSchema):
     pass
@@ -23,6 +24,7 @@ class ProductUpdate(SQLModel):
     url:Optional[str]=None
     platform:Optional[str]=None
     target_price:Optional[float]=None
+    user_qq:Optional[str]=None
     current_price:Optional[float]=None
     last_checked_time:Optional[datetime]=None
 

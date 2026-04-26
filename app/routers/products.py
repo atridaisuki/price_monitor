@@ -15,7 +15,7 @@ async def create_product(
     session: AsyncSession = Depends(get_session)
 ):
     """创建商品"""
-    #from_orm 将schemas.productcreate格式直接转为models.product
+    #from_orm 将schemas.productcreate格式直接转为models.proudct
     db_product = models.Product.from_orm(product)
 
 

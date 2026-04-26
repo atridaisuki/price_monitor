@@ -9,6 +9,7 @@ class ProductBase(SQLModel):
     url:str
     platform: str =Field(default="steam")
     target_price: float
+    user_qq: Optional[str] = None
 
 class Product(ProductBase,table=True):
     id: Optional[int] =Field(default=None,primary_key=True)

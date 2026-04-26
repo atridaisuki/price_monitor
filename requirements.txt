@@ -8,3 +8,4 @@ httpx
 alembic
 beautifulsoup4
 lxml
+apscheduler

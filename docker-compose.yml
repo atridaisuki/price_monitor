@@ -2,17 +2,25 @@
 
 services:
   web:
+    #构建镜像（从当前目录的dockerfile构建）
     build: .
     container_name: monitor_web
+    #容器崩溃后自动重启
     restart: always
+    #覆盖dockerfile的cmd
+    #reload 开发模式，代码变化自动重启
     command: uvicorn app.main:app --host 0.0.0.0 --port 8000 --reload
+    #端口映射
     ports:
       - "8000:8000"
+    #环境变量（db和monitor—db是服务名）
     environment:
       - DATABASE_URL=postgresql+asyncpg://admin:mypassword@db/monitor_db
       - REDIS_URL=redis://redis:6379
+    #数据卷
     volumes:
-      - .:/code
+      - .:/app
+    #服务依赖
     depends_on:
         db:
             condition: service_healthy
@@ -27,20 +35,60 @@ services:
       - POSTGRES_DB=monitor_db
     ports:
       - "5432:5432"
+    #声明数据卷位置
     volumes:
       - pg_data:/var/lib/postgresql/data
+    #健康检查
     healthcheck:
       test: ["CMD-SHELL", "pg_isready -U admin -d monitor_db"]
       interval: 5s
       timeout: 5s
       retries: 5
 
-  redis_cache:
+  redis:
     image: redis:alpine
     container_name: monitor_redis
     restart: always
     ports:
       - "6379:6379"
 
+  bot:
+    build: ./bot
+    container_name: monitor_bot
+    restart: always
+    ports:
+      - "8080:8080"
+    env_file:
+      - ./bot/.env
+    environment:
+      - REDIS_URL=redis://redis:6379
+      - API_BASE_URL=http://web:8000
+      - ONEBOT_WS_URLS=["ws://napcat:3001"]
+    volumes:
+      - ./bot:/app
+      - napcat_temp:/root/.cache/nonebot2
+    depends_on:
+      - web
+      - redis
+      - napcat
+
+  napcat:
+    image: mlikiowa/napcat-docker:latest
+    container_name: monitor_napcat
+    restart: always
+    ports:
+      - "3001:3001"  # WebSocket 端口
+      - "6099:6099"  # WebUI 管理界面
+    environment:
+      - ACCOUNT=3412643116  # 留空，通过 WebUI 扫码登录
+      - WSR_ENABLE=true
+      - WS_URLS=["ws://bot:8080/onebot/v11/ws"]
+    volumes:
+      - ./napcat/config:/app/napcat/config
+      - ./napcat/data:/app/napcat/data
+      - napcat_temp:/app/.config/QQ/NapCat/temp
+
 volumes:
   pg_data:
+  napcat_temp:
+#删除容器不会删除数据卷
