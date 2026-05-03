@@ -1,3 +1,5 @@
+import os
+
 from fastapi import FastAPI
 from app.database import init_db
 from app import models
@@ -10,6 +12,11 @@ app=FastAPI(title="Price Monitor")
 # 注册 API 路由
 app.include_router(products.router, prefix="/api")
 app.include_router(tasks.router, prefix="/api")
+
+# 仅开发环境注册调试路由
+if os.getenv("DEBUG", "").lower() in ("1", "true"):
+    from app.routers import debug
+    app.include_router(debug.router, prefix="/api")
 
 @app.on_event("startup")
 async def on_startup():

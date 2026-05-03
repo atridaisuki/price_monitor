@@ -101,7 +101,7 @@ async def handle_add_product(bot: Bot, event: MessageEvent, args: Message = Comm
     # 调用 API 添加商品
     user_qq = str(event.get_user_id())
     try:
-        async with httpx.AsyncClient() as client:
+        async with httpx.AsyncClient() as client: #Bot->后端 通过http api交互
             response = await client.post(
                 f"{API_BASE_URL}/api/products/",
                 json={

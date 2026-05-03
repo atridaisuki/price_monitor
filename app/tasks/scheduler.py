@@ -15,7 +15,7 @@ def start_scheduler():
 
     # 添加价格检查任务（每 30 分钟执行一次）
     scheduler.add_job(
-        check_all_prices,
+        check_all_prices, # 这个就是调用price checker的那个方法
         trigger=IntervalTrigger(minutes=30),
         id="check_all_prices",
         name="检查所有商品价格",
