@@ -1,14 +1,12 @@
 # Price Monitor
 
-一个基于 FastAPI、PostgreSQL、Redis 的价格监控项目，当前主线先保证后端价格检查与 Redis 通知闭环稳定，再逐步收口 bot / napcat、文档和迁移。
+Steam 游戏价格监控系统。自动抓取商品价格，低于目标价时通过 Redis 推送通知，支持 QQ 机器人提醒。
 
-## 当前主链路
+Built with FastAPI, PostgreSQL, Redis, APScheduler, NoneBot2.
 
-当前优先保证这条链路稳定：
+## 核心链路
 
-`POST /api/tasks/check-prices -> check_all_prices -> 抓取价格 -> 更新商品/历史 -> publish_price_alert -> subscriber / bot consumer 消费`
-
-当前默认主通知通道仍是 `Redis + subscriber`。`bot / napcat` 暂时视为增强通道，待真实联调验证后再决定是否转正。
+`创建商品 → 定时/手动触发价格检查 → 抓取价格 → 更新历史 → Redis Pub/Sub 通知 → QQ Bot 推送`
 
 ## 项目结构
 
@@ -268,11 +266,9 @@ alembic revision --autogenerate -m "describe change"
 - 启动前请先执行 `alembic upgrade head`
 - 仅在明确需要快速初始化空开发库时，才临时设置 `DB_INIT_MODE=create_all`
 
-## 当前已知限制
+## 已知限制
 
-- 真实 Redis / PostgreSQL / Docker 联调仍依赖本地环境可用性
-- 开发环境若未先执行 Alembic 迁移，默认启动不会自动建表；需要先运行 `alembic upgrade head`，或显式设置 `DB_INIT_MODE=create_all`
-- `bot / napcat` 已具备基础结构，但还未完成作为主通道的最终验证
+- bot / napcat 通道已具备基础结构，尚未完成最终联调验证
 
 ## 关键文件
 
